@@ -25,11 +25,11 @@ contract DeployAllScript is Script {
         accountImplementation = address(new IthacaAccount(address(orchestrator)));
         accountProxy = LibEIP7702.deployProxy(accountImplementation, address(0));
         simulator = address(new Simulator());
-        funder = address(
-            new SimpleFunder(
-                vm.envAddress("FUNDER"), address(orchestrator), vm.envAddress("FUNDER_OWNER")
-            )
-        );
+
+        funder = address(new SimpleFunder(vm.envAddress("FUNDER"), msg.sender));
+        address[] memory ocs = new address[](1);
+        ocs[0] = address(orchestrator);
+        SimpleFunder(payable(funder)).setOrchestrators(ocs, true);
         simpleSettler = address(new SimpleSettler(vm.envAddress("SETTLER_OWNER")));
         escrow = address(new Escrow());
 

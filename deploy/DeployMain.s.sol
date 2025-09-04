@@ -64,6 +64,7 @@ contract DeployMain is Script, SafeSingletonDeployer {
         address l0SettlerOwner;
         address l0SettlerSigner;
         address layerZeroEndpoint;
+        address[] oldOrchestrators;
         uint32 layerZeroEid;
         bytes32 salt;
         string[] contracts; // Array of contract names to deploy
@@ -797,16 +798,10 @@ contract DeployMain is Script, SafeSingletonDeployer {
         ChainConfig memory config,
         DeployedContracts memory deployed
     ) internal {
-        // Ensure Orchestrator is deployed first (dependency)
-        if (deployed.orchestrator == address(0)) {
-            console.log("Deploying Orchestrator first (dependency for SimpleFunder)...");
-            deployOrchestrator(chainId, config, deployed);
-        }
-
         if (deployed.simpleFunder == address(0)) {
             bytes memory creationCode = type(SimpleFunder).creationCode;
-            bytes memory args =
-                abi.encode(config.funderSigner, deployed.orchestrator, config.funderOwner);
+
+            bytes memory args = abi.encode(config.funderSigner, config.funderOwner);
             address funder = deployContractWithCreate2(chainId, creationCode, args, "SimpleFunder");
 
             saveDeployedContract(chainId, "SimpleFunder", funder);
