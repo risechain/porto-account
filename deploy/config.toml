@@ -17,17 +17,20 @@ layerzero_receive_uln302 = "0x0000000000000000000000000000000000000000"
 dvn_layerzero_labs = "0x0000000000000000000000000000000000000000"
 dvn_google_cloud = "0x0000000000000000000000000000000000000000"
 exp_minter_address = "0x0000000000000000000000000000000000000000"
-supported_orchestrators = []
+supported_orchestrators = ["0xC8F2A03C57207a849865cAa2B22eFDB28F1a0F74"]
 orchestrator_deployed = "0xC8F2A03C57207a849865cAa2B22eFDB28F1a0F74"
 ithaca_account_deployed = "0xDF3E102d92320d119FEA727d3eF30F3570Bb3379"
 simulator_deployed = "0xc2E0e0BF23f24ece1dbec86A37D5e10FfdB204D8"
 simple_funder_deployed = "0x1fCA5FEF9d742cCb585cFFdD046E440815DB5B2B"
+escrow_deployed = "0xf841803188076c7198852a9827059c30Fe4f0CAD"
+simple_settler_deployed = "0xe5e477d959A78152FB87Cd77ba8793f7f5BAdfDc"
+account_proxy_deployed = "0x6FbDD3a61c60c007c9F9Bb3951E50710Af71E8c0"
 
 [11155931.uint]
 chain_id = 11155931
 layerzero_eid = 0
-target_balance = "50000000000000000"
-default_num_signers = 10
+target_balance = "500000000000"
+default_num_signers = 2
 layerzero_confirmations = 1
 layerzero_max_message_size = 10000
 layerzero_optional_dvn_threshold = 0
@@ -44,6 +47,9 @@ contracts = [
     "IthacaAccount",
     "Simulator",
     "SimpleFunder",
+    "Escrow",
+    "SimpleSettler",
+    "AccountProxy",
 ]
 layerzero_required_dvns = ["dvn_layerzero_labs"]
 layerzero_optional_dvns = []
