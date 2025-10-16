@@ -90,6 +90,8 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
         mapping(bytes32 => LibBytes.BytesStorage) keyStorage;
         /// @dev Mapping of key hash to the key's extra storage.
         mapping(bytes32 => LibStorage.Bump) keyExtraStorage;
+        /// @dev Nonce management when porto account acts as paymaster.
+        mapping(bytes32 => bool) paymasterNonces;
     }
 
     /// @dev Returns the storage pointer.
@@ -133,6 +135,9 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
     /// If you want to upgrade to a bricked implementation,
     /// use `address(0xdeaDDeADDEaDdeaDdEAddEADDEAdDeadDEADDEaD)`.
     error NewImplementationIsZero();
+
+    /// @dev The paymaster nonce has already been used.
+    error PaymasterNonceError();
 
     ////////////////////////////////////////////////////////////////////////
     // Events
@@ -269,8 +274,8 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
 
         (bool isValid, bytes32 keyHash) = unwrapAndValidateSignature(digest, signature);
         if (LibBit.and(keyHash != 0, isValid)) {
-            isValid =
-                _isSuperAdmin(keyHash) || _getKeyExtraStorage(keyHash).checkers.contains(msg.sender);
+            isValid = _isSuperAdmin(keyHash)
+                || _getKeyExtraStorage(keyHash).checkers.contains(msg.sender);
         }
         // `bytes4(keccak256("isValidSignature(bytes32,bytes)")) = 0x1626ba7e`.
         // We use `0xffffffff` for invalid, in convention with the reference implementation.
@@ -394,12 +399,7 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
     }
 
     /// @dev Returns arrays of all (non-expired) authorized keys and their hashes.
-    function getKeys()
-        public
-        view
-        virtual
-        returns (Key[] memory keys, bytes32[] memory keyHashes)
-    {
+    function getKeys() public view virtual returns (Key[] memory keys, bytes32[] memory keyHashes) {
         uint256 totalCount = keyCount();
 
         keys = new Key[](totalCount);
@@ -570,21 +570,12 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
 
     /// @dev Adds the key. If the key already exist, its expiry will be updated.
     function _addKey(Key memory key) internal virtual returns (bytes32 keyHash) {
-        if (key.isSuperAdmin) {
-            if (!_keyTypeCanBeSuperAdmin(key.keyType)) revert KeyTypeCannotBeSuperAdmin();
-        }
         // `keccak256(abi.encode(key.keyType, keccak256(key.publicKey)))`.
         keyHash = hash(key);
         AccountStorage storage $ = _getAccountStorage();
-        $.keyStorage[keyHash].set(
-            abi.encodePacked(key.publicKey, key.expiry, key.keyType, key.isSuperAdmin)
-        );
+        $.keyStorage[keyHash]
+        .set(abi.encodePacked(key.publicKey, key.expiry, key.keyType, key.isSuperAdmin));
         $.keyHashes.add(keyHash);
-    }
-
-    /// @dev Returns if the `keyType` can be a super admin.
-    function _keyTypeCanBeSuperAdmin(KeyType keyType) internal view virtual returns (bool) {
-        return keyType != KeyType.P256;
     }
 
     /// @dev Removes the key corresponding to the `keyHash`. Reverts if the key does not exist.
@@ -631,17 +622,20 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
             if or(shr(64, t), lt(encodedIntent.length, 0x20)) { revert(0x00, 0x00) }
         }
 
-        if (
-            !LibBit.and(
+        if (!LibBit.and(
                 msg.sender == ORCHESTRATOR,
                 LibBit.or(intent.eoa == address(this), intent.payer == address(this))
-            )
-        ) {
+            )) {
             revert Unauthorized();
         }
 
         // If this account is the paymaster, validate the paymaster signature.
         if (intent.payer == address(this)) {
+            if (_getAccountStorage().paymasterNonces[intentDigest]) {
+                revert PaymasterNonceError();
+            }
+            _getAccountStorage().paymasterNonces[intentDigest] = true;
+
             (bool isValid, bytes32 k) =
                 unwrapAndValidateSignature(intentDigest, intent.paymentSignature);
 
@@ -753,6 +747,6 @@ contract IthacaAccount is IIthacaAccount, EIP712, GuardedExecutor {
         returns (string memory name, string memory version)
     {
         name = "IthacaAccount";
-        version = "0.5.7";
+        version = "0.5.10";
     }
 }

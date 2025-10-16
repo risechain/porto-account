@@ -375,8 +375,15 @@ contract Orchestrator is IOrchestrator, EIP712, CallContextChecker, ReentrancyGu
                 // If the self call is successful, we know that the payment has been made,
                 // and the sequence for `nonce` has been incremented.
                 // For more information, see `selfCallPayVerifyCall537021665()`.
-                selfCallSuccess :=
-                    call(g, address(), 0, add(m, 0x1c), add(encodedIntent.length, 0x24), 0x00, 0x20)
+                selfCallSuccess := call(
+                    g,
+                    address(),
+                    0,
+                    add(m, 0x1c),
+                    add(encodedIntent.length, 0x24),
+                    0x00,
+                    0x20
+                )
                 err := mload(0x00) // The self call will do another self call to execute.
 
                 if iszero(selfCallSuccess) {
@@ -459,7 +466,7 @@ contract Orchestrator is IOrchestrator, EIP712, CallContextChecker, ReentrancyGu
         // simulation, and suggests banning users that intentionally grief the simulation.
 
         // Handle the sub Intents after initialize (if any), and before the `_verify`.
-        if (i.encodedPreCalls.length != 0) _handlePreCalls(eoa, flags, i.encodedPreCalls);
+        if (i.encodedPreCalls.length != 0) _handlePreCalls(eoa, i.payer, flags, i.encodedPreCalls);
 
         // If `_verify` is invalid, just revert.
         // The verification gas is determined by `executionData` and the account logic.
@@ -528,16 +535,18 @@ contract Orchestrator is IOrchestrator, EIP712, CallContextChecker, ReentrancyGu
     /// - Call the Account with `executionData`, using the ERC7821 batch-execution mode.
     ///   If the call fails, revert.
     /// - Emit an {IntentExecuted} event.
-    function _handlePreCalls(address parentEOA, uint256 flags, bytes[] calldata encodedPreCalls)
-        internal
-        virtual
-    {
+    function _handlePreCalls(
+        address parentEOA,
+        address payer,
+        uint256 flags,
+        bytes[] calldata encodedPreCalls
+    ) internal virtual {
         for (uint256 j; j < encodedPreCalls.length; ++j) {
             SignedCall calldata p = _extractPreCall(encodedPreCalls[j]);
             address eoa = Math.coalesce(p.eoa, parentEOA);
             uint256 nonce = p.nonce;
 
-            if (eoa != parentEOA) revert InvalidPreCallEOA();
+            if (eoa != parentEOA && eoa != payer) revert InvalidPreCallEOA();
 
             (bool isValid, bytes32 keyHash) = _verify(_computeDigest(p), eoa, p.signature);
 
@@ -831,7 +840,7 @@ contract Orchestrator is IOrchestrator, EIP712, CallContextChecker, ReentrancyGu
         returns (string memory name, string memory version)
     {
         name = "Orchestrator";
-        version = "0.5.4";
+        version = "0.5.5";
     }
 
     ////////////////////////////////////////////////////////////////////////
