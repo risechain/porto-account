@@ -17,14 +17,14 @@ layerzero_receive_uln302 = "0x0000000000000000000000000000000000000000"
 dvn_layerzero_labs = "0x0000000000000000000000000000000000000000"
 dvn_google_cloud = "0x0000000000000000000000000000000000000000"
 exp_minter_address = "0x0000000000000000000000000000000000000000"
-supported_orchestrators = ["0xC8F2A03C57207a849865cAa2B22eFDB28F1a0F74"]
-orchestrator_deployed = "0xC8F2A03C57207a849865cAa2B22eFDB28F1a0F74"
-ithaca_account_deployed = "0xDF3E102d92320d119FEA727d3eF30F3570Bb3379"
-simulator_deployed = "0xc2E0e0BF23f24ece1dbec86A37D5e10FfdB204D8"
-simple_funder_deployed = "0x1fCA5FEF9d742cCb585cFFdD046E440815DB5B2B"
+supported_orchestrators = ["0xcb5CEf3C54aa90e9A7ad602A258D3d360cC862B9"]
+orchestrator_deployed = "0xcb5CEf3C54aa90e9A7ad602A258D3d360cC862B9"
+ithaca_account_deployed = "0x33aD2F49ab9f122f5F0FDF579f575724EfF353DE"
+simulator_deployed = "0xb100Dc6e1BA9e54965fBB865F65Ac42b28BC25E8"
+simple_funder_deployed = "0x19E13F4cf8Efac2e6D5bec7a4052a37FfbbFc576"
 escrow_deployed = "0xf841803188076c7198852a9827059c30Fe4f0CAD"
 simple_settler_deployed = "0xe5e477d959A78152FB87Cd77ba8793f7f5BAdfDc"
-account_proxy_deployed = "0x6FbDD3a61c60c007c9F9Bb3951E50710Af71E8c0"
+account_proxy_deployed = "0x4F4ddE38Da9F8AbBb96C48cA520b992D4bADc3D6"
 
 [11155931.uint]
 chain_id = 11155931
@@ -38,7 +38,7 @@ exp_mint_amount = "1000000000000000000000"
 layerzero_destination_chain_ids = []
 
 [11155931.bytes32]
-salt = "0x38d3b1ef5a7d83387181552d6745fad9cc091115764179060e04e95e97647916"
+salt = "0xdf08a9fa957a9ac004f84f3a8ab7318a7be55d59948f46497bd3717865295b61"
 
 [11155931.string]
 name = "RISE Testnet"
@@ -47,8 +47,6 @@ contracts = [
     "IthacaAccount",
     "Simulator",
     "SimpleFunder",
-    "Escrow",
-    "SimpleSettler",
     "AccountProxy",
 ]
 layerzero_required_dvns = ["dvn_layerzero_labs"]
