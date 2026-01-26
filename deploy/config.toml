@@ -129,7 +129,7 @@ account_proxy_deployed = "0x4F4ddE38Da9F8AbBb96C48cA520b992D4bADc3D6"
 [11155111.uint]
 chain_id = 11155111
 layerzero_eid = 0
-target_balance = "1000000000000000"
+target_balance = "30000000000000000"
 default_num_signers = 2
 layerzero_confirmations = 1
 layerzero_max_message_size = 10000
